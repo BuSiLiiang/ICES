@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mapper.EmpMapper">
+   <!-- 案例：select * from emp where empno=#{empno} or ename=#{ename} and job=#{job}
+    如果select节点中是以上sql语句，parameterType是Emp类型，则此情况可以使用where标签,
+    where标签的作用是如果if条件不满足则执行，如果满足if条件将会忽略where关键字后的
+    第一个or或and
+    select * from emp
+    <where>
+        <if test="empno!=null">
+            empno=#{empno}
+        </if>
+        <if test="ename!=null">
+           or ename=#{ename}
+        </if>
+        <if test="job!=null">
+           and job=#{job}
+        </if>
+    </where>
+    -->
+    <!--if或when的test条件中的属性判断，必须从参数对象的第一层属性判断起，-->
+    <!--如果Emp类中有empno属性，有dept对象属性，则要判断empno值和dept中deptno的值，-->
+    <!--则写法是empno！=null，dept！=null && dept.deptno!=null-->
+    <select id="selectEmp" resultMap="empmap" parameterType="Emp">
+         select d.dname,d.loc,e.* from emp e,dept d where e.deptno=d.deptno
+         <if test="empno!=null">
+             and e.empno=#{empno}
+         </if>
+         <if test="ename!=null">
+             and e.ename=#{ename}
+         </if>
+         <if test="job!=null">
+             and e.job=#{job}
+         </if>
+         <if test="dept!=null and dept.deptno!=null">
+             and e.deptno=#{dept.deptno}
+         </if>
+    </select>
+
+    <resultMap id="empmap" type="Emp">
+        <!--因为当前多方配置，因此在resultMap中先配置多方的主键和普通列的映射-->
+        <id column="EMPNO" property="empno"/>
+        <result column="ENAME" property="ename"/>
+        <result column="JOB " property="job"/>
+        <result column="MGR" property="mgr"/>
+        <result column="HIREDATE" property="hiredate"/>
+        <result column="SAL" property="sal"/>
+        <result column="COMM" property="comm"/>
+
+        <!--因为在多方引用了一方的对象，因此在引用一方对象属性的地方配置association节点-->
+        <!--association节点的property属性对应的多方引用一方的对象属性名,-->
+        <!--javaType是多方引用一方的类类型即配置类的全路径-->
+        <!--column是多方关联一方的外键列的列名-->
+        <association property="dept" javaType="Dept" column="DEPTNO">
+            <!--由于多方引用的了一方对象，因此在association对象节点下配置一方的主键和普通字段-->
+            <id column="DEPTNO" property="deptno"/>
+            <result column="DNAME" property="dname"/>
+            <result column="LOC" property="loc"/>
+        </association>
+    </resultMap>
+
+    <insert id="insertEmp" parameterType="Emp">
+         INSERT  INTO emp(empno, ename, job, mgr, hiredate, sal, comm, deptno) VALUES
+         (#{empno},#{ename},#{job},#{mgr},#{hiredate},#{sal},#{comm},#{dept.deptno})
+    </insert>
+
+    <!--set标签的结束标签要在where条件之前-->
+    <update id="updateEmp" parameterType="Emp">
+        UPDATE emp
+        <set>
+            <if test="ename!=null">
+                ename=#{ename} ,
+            </if>
+            <if test="job!=null">
+                job=#{job} ,
+            </if>
+            <if test="mgr!=null">
+                   mgr=#{mgr} ,
+            </if>
+            <if test="hiredate!=null">
+                hiredate=#{hiredate} ,
+            </if>
+            <if test="sal!=null">
+                 sal=#{sal},
+            </if>
+            <if test="comm!=null">
+               comm=#{comm},
+            </if>
+            <if test="dept!=null and dept.deptno!=null">
+               deptno=#{dept.deptno}  ,
+            </if>
+        </set>
+        <include refid="wherecondition"/>
+    </update>
+
+    <delete id="deleteEmp" parameterType="Emp">
+        delete from emp
+        <include refid="wherecondition"/>
+    </delete>
+
+     <!--定义公共的sql片段-->
+   <sql id="wherecondition">
+       <where>
+           <if test="empno!=null">
+               empno=#{empno}
+           </if>
+       </where>
+   </sql>
+
+</mapper>

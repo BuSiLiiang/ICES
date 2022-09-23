@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--配置规则：-->
+<!--有代理的namespace值必须是映射接口全路径，sql节点的id值必须是映射接口中的方法名-->
+<!--无代理的namespace值和sql节点的id值是任意的，但一般情况下和和有代理的原则一样-->
+<mapper namespace="com.mapper.DeptMapper">
+     <select id="selectAllDept" resultType="Dept">
+          select * from dept
+     </select>
+</mapper>
